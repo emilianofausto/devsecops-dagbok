@@ -159,4 +159,3 @@ Jag har konfigurerat följande säkerhetsinställningar på GitHub:
 * **Ingen radering:** Det går inte att ta bort `main`-branchen från GitHub av misstag.
 
 Det här gör att vår utveckling blir säker och att koden som ligger i huvudgrenen alltid fungerar och är testad.
-
