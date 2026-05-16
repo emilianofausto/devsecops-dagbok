@@ -1,0 +1,81 @@
+name: DevSecOps CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  security-sast:
+    name: Security Linting (Bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Security Scanner
+        run: pip install bandit
+
+      - name: Run Bandit Security Scan
+        # Scans the backend folder recursively while skipping the virtual environment
+        run: bandit -r backend/ -x backend/.venv/
+
+  run-api-tests:
+    name: run-api-tests
+    runs-on: ubuntu-latest
+    needs: security-sast # Guardrail: Security checks must pass before executing code
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js (for Newman)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install fastapi uvicorn sqlalchemy pydantic
+          fi
+
+      - name: Start FastAPI Server
+        run: |
+          cd backend
+          # Starts the server asynchronously in the background
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+
+      - name: API Health Check Verification Loop
+        run: |
+          echo "Waiting for FastAPI backend to initialize..."
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:8000/api/entries > /dev/null; then
+              echo "FastAPI is online and healthy."
+              exit 0
+            fi
+            echo "Server not ready yet. Retrying in 2 seconds (Attempt $i/10)..."
+            sleep 2
+          done
+          echo "Error: FastAPI failed to start within the time limit."
+          exit 1
+
+      - name: Install Newman CLI
+        run: npm install -g newman
+
+      - name: Execute Automated Newman Test Collection
+        run: newman run backend/tests/api_collection.json
