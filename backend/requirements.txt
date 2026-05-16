@@ -1,0 +1,18 @@
+# Web Framework and Server
+fastapi==0.115.8
+uvicorn==0.34.0
+
+# Data Validation
+pydantic==2.10.6
+
+# Testing
+pytest==8.3.4
+httpx==0.28.1
+
+# Security Audit
+pip-audit==2.8.0
+
+# Code Quality & Linting (VG Criterion)
+pylint==3.3.4
+
+sqlalchemy==2.0.49
