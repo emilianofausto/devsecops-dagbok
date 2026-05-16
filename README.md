@@ -41,7 +41,7 @@ Tänk på att starta backend först (`uvicorn app.main:app --port 8000`). Open e
 ### 1. Skapa en ny anteckning (POST)
 Det här kommandot skickar data för att göra en ny dagboksanteckning.
 ```bash
-curl -X POST [http://127.0.0.1:8000/api/entries](http://127.0.0.1:8000/api/entries) \
+curl -X POST http://127.0.0.1:8000/api/entries \
      -H "Content-Type: application/json" \
      -d '{"title": "Testa med Curl", "content": "Det här är en manuell test", "category": "DevSecOps"}'
 ```
@@ -50,19 +50,19 @@ curl -X POST [http://127.0.0.1:8000/api/entries](http://127.0.0.1:8000/api/entri
 ### 2. Hämta alla anteckningar (GET)
 Det här hämtar listan med alla anteckningar som finns i databasen.
 ```bash
-curl -X GET [http://127.0.0.1:8000/api/entries](http://127.0.0.1:8000/api/entries)
+curl -X GET http://127.0.0.1:8000/api/entries
 ```
 
 ### 3. Hämta en specifik anteckning (GET med ID)
 Här du kan hämta bara en anteckning. Byt ut siffran `1` i slutet om ditt id är något annat.
 ```bash
-curl -X GET [http://127.0.0.1:8000/api/entries/1](http://127.0.0.1:8000/api/entries/1)
+curl -X GET[http://127.0.0.1:8000/api/entries/1
 ```
 
 ### 4. Uppdatera en anteckning (PUT)
 Det här ändrar titeln på anteckningen med id 1.
 ```bash
-curl -X PUT [http://127.0.0.1:8000/api/entries/1](http://127.0.0.1:8000/api/entries/1) \
+curl -X PUT http://127.0.0.1:8000/api/entries/1 \
      -H "Content-Type: application/json" \
      -d '{"title": "Ny titel via Curl"}'
 ```
@@ -70,14 +70,14 @@ curl -X PUT [http://127.0.0.1:8000/api/entries/1](http://127.0.0.1:8000/api/entr
 ### 5. Radera en anteckning (DELETE)
 Det här tar bort anteckningen helt från databasen.
 ```bash
-curl -X DELETE [http://127.0.0.1:8000/api/entries/1](http://127.0.0.1:8000/api/entries/1)
+curl -X DELETE http://127.0.0.1:8000/api/entries/1 
 ```
 *Om du kör GET efter det här, anteckningen ska inte finnas kvar.*
 
 ### 6. Testa input validering (Felhantering)
 För att testa VG-kravet om validering, vi skickar tomma fält. Backend ska stoppa detta.
 ```bash
-curl -X POST [http://127.0.0.1:8000/api/entries](http://127.0.0.1:8000/api/entries) \
+curl -X POST http://127.0.0.1:8000/api/entries \
      -H "Content-Type: application/json" \
      -d '{"title": "", "content": "", "category": ""}'
 ```
