@@ -144,3 +144,19 @@ Följ dessa steg för att se din data:
 Nu du kommer se en tabell med kolumner för `id`, `title`, `content`, `category` och `created_at`. 
 
 *Tips! Det här är jättebra när du testar appen. Om du klickar på "Radera" i din frontend, du kan trycka på refresh i SQLiteStudio (Letos) för att se direkt att raden försvinner från databasen.*
+
+
+## Hur jag skyddade main-branchen:
+
+För att arbeta med bra DevSecOps-metoder har jag lagt till skyddsregler (Branch Protection Rules) på GitHub för `main`-branchen. Det här är viktigt så att ingen kan skriva över historiken eller råka pusha kod som inte fungerar.
+
+Jag har konfigurerat följande säkerhetsinställningar på GitHub:
+
+* **Stoppat direkt push:** Det går inte att köra `git push origin main` direkt från terminalen längre. Om man försöker, GitHub kommer att ge ett felmeddelande och stoppa det.
+* **Krav på Pull Request (PR):** Om man vill lägga till nya funktioner eller fixa fel, man måste skapa en egen gren (feature branch) först. Sedan måste man göra en Pull Request för att flytta koden till `main`.
+* **Krav på godkända tester (Status Checks):** Jag har ställt in att våra automatiska tester i GitHub Actions (med Newman) måste köras och bli helt gröna innan koden får slås ihop (merge) med `main`.
+* **Ingen Force Push:** Det är helt blockerat att använda `git push --force`. Det gör att ingen kan radera historiken i databasen av commits.
+* **Ingen radering:** Det går inte att ta bort `main`-branchen från GitHub av misstag.
+
+Det här gör att vår utveckling blir säker och att koden som ligger i huvudgrenen alltid fungerar och är testad.
+
