@@ -116,7 +116,7 @@ jobs:
   run-e2e-tests:
     name: Run E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    needs: code-quality
+    needs: [security-sast, code-quality]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -152,7 +152,7 @@ jobs:
   deploy:
     name: Continuous Deployment (CD)
     runs-on: ubuntu-latest
-    needs: run-api-tests
+    needs: [run-api-tests, run-e2e-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Code
