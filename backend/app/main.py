@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db, DiaryEntryModel
@@ -39,7 +40,7 @@ def create_entry(entry_data: DiaryEntryCreate, db: Session = Depends(get_db)):
     new_entry = DiaryEntryModel(**entry_data.model_dump())
     db.add(new_entry)
     db.commit()
-    db.refresh(new_entry)
+    # db.refresh(new_entry)
     return new_entry
 
 @app.put("/api/entries/{entry_id}", response_model=DiaryEntryResponse, status_code=status.HTTP_200_OK)
@@ -76,3 +77,5 @@ def delete_entry(entry_id: int, db: Session = Depends(get_db)):
     db.delete(entry)
     db.commit()
     return {"message": f"Entry {entry_id} successfully deleted"}
+
+app.mount("/", StaticFiles(directory="/app/frontend", html=True), name="static")
