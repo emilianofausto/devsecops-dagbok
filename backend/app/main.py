@@ -1,3 +1,6 @@
+"""
+Main module for the DevSecOps Diary API.
+"""
 import os
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status
@@ -22,57 +25,78 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/api/entries", response_model=List[DiaryEntryResponse], status_code=status.HTTP_200_OK)
+@app.get(
+    "/api/entries",
+    response_model=List[DiaryEntryResponse],
+    status_code=status.HTTP_200_OK
+)
 def get_all_entries(db: Session = Depends(get_db)):
+    """It gets all entries from the database."""
     return db.query(DiaryEntryModel).all()
 
-@app.get("/api/entries/{entry_id}", response_model=DiaryEntryResponse, status_code=status.HTTP_200_OK)
+@app.get(
+    "/api/entries/{entry_id}",
+    response_model=DiaryEntryResponse,
+    status_code=status.HTTP_200_OK
+)
 def get_single_entry(entry_id: int, db: Session = Depends(get_db)):
+    """Search an entry by its ID."""
     entry = db.query(DiaryEntryModel).filter(DiaryEntryModel.id == entry_id).first()
     if not entry:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Entry with ID {entry_id} not found"
         )
     return entry
 
-@app.post("/api/entries", response_model=DiaryEntryResponse, status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/api/entries",
+    response_model=DiaryEntryResponse,
+    status_code=status.HTTP_201_CREATED
+)
 def create_entry(entry_data: DiaryEntryCreate, db: Session = Depends(get_db)):
+    """It creates a new entry in the BD with your data given."""
     new_entry = DiaryEntryModel(**entry_data.model_dump())
     db.add(new_entry)
     db.commit()
     # db.refresh(new_entry)
     return new_entry
 
-@app.put("/api/entries/{entry_id}", response_model=DiaryEntryResponse, status_code=status.HTTP_200_OK)
+@app.put(
+    "/api/entries/{entry_id}",
+    response_model=DiaryEntryResponse,
+    status_code=status.HTTP_200_OK
+)
 def update_entry(entry_id: int, entry_data: DiaryEntryUpdate, db: Session = Depends(get_db)):
+    """Updates an existing entry."""
     entry = db.query(DiaryEntryModel).filter(DiaryEntryModel.id == entry_id).first()
     if not entry:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Entry with ID {entry_id} not found"
         )
-    
+
     update_dict = entry_data.model_dump(exclude_unset=True)
     if not update_dict:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Payload contains no valid modifications"
         )
-        
+
     for key, value in update_dict.items():
         setattr(entry, key, value)
-        
+
     db.commit()
     db.refresh(entry)
     return entry
 
 @app.delete("/api/entries/{entry_id}", status_code=status.HTTP_200_OK)
 def delete_entry(entry_id: int, db: Session = Depends(get_db)):
+    """This deletes an entry from the database."""
     entry = db.query(DiaryEntryModel).filter(DiaryEntryModel.id == entry_id).first()
     if not entry:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Entry with ID {entry_id} not found"
         )
     db.delete(entry)
@@ -81,10 +105,10 @@ def delete_entry(entry_id: int, db: Session = Depends(get_db)):
 
 if os.path.exists("/app/frontend/src"):
     # Production (Container Docker in Render)
-    frontend_dir = "/app/frontend/src"
+    FRONTEND_DIR = "/app/frontend/src"
 else:
     # Local environment y GitHub Actions
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    frontend_dir = os.path.abspath(os.path.join(current_dir, "..", "..", "frontend", "src"))
+    CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+    FRONTEND_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", "frontend", "src"))
 
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
+app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="static")
