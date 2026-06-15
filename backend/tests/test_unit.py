@@ -10,6 +10,8 @@ from sqlalchemy.orm import sessionmaker
 from app.main import app, get_db
 from app.database import Base
 
+from app.database import engine as app_engine
+
 # Setup isolated in-memory database topology for hermetic unit testing
 TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
@@ -38,8 +40,7 @@ def fixture_client(db_session):
 
     # Bind the dependency override to intercept get_db calls during requests
     app.dependency_overrides[get_db] = _get_test_db
-    
-    from app.database import engine as app_engine
+
     Base.metadata.create_all(bind=engine)
     Base.metadata.create_all(bind=app_engine)
 
