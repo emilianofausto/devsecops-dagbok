@@ -1,0 +1,24 @@
+{
+  "name": "dagbok",
+  "version": "1.0.0",
+  "description": "Detta är ett fullstack-projekt skapat av Emiliano som en del av inlämningsuppgiften given av NBI Handelsakademin (Kurs: DevSecOps VT26).",
+  "main": "playwright.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emilianofausto/devsecops-dagbok.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/emilianofausto/devsecops-dagbok/issues"
+  },
+  "homepage": "https://github.com/emilianofausto/devsecops-dagbok#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.61.0"
+  }
+}
