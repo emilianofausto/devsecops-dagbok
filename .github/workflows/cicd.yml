@@ -60,6 +60,7 @@ jobs:
       - name: Start FastAPI Server
         env:
             DATABASE_URL: "sqlite:///./test_dagbok.db"
+            PYTHONPATH: "${{ github.workspace }}/backend"
         run: |
           cd backend
           uvicorn app.main:app --host 127.0.0.1 --port 8000 &
