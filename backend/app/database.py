@@ -1,13 +1,15 @@
-import datetime
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
+import os
+from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = "sqlite:///./dagbok.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./dagbok.db")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# This line must be present for main.py to import it
 Base = declarative_base()
 
 class DiaryEntryModel(Base):
