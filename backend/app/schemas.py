@@ -16,7 +16,6 @@ class DiaryEntryBase(BaseModel):
 
 class DiaryEntryCreate(DiaryEntryBase):
     """Schema for creating a new diary entry."""
-    pass
 
 class DiaryEntryUpdate(BaseModel):
     """Schema for updating an existing diary entry. All fields are optional."""
