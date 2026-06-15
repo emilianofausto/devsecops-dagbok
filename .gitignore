@@ -69,3 +69,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.swp
+
+# Testing
+test-results/
