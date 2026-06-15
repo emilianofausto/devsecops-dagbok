@@ -1,12 +1,6 @@
-"""
-Pydantic schemas for the DevSecOps Diary API.
-Provides data validation and serialization for API requests and responses.
-"""
-# pylint: disable=too-few-public-methods
-
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class DiaryEntryBase(BaseModel):
     """Base schema containing common attributes for a diary entry."""
@@ -27,7 +21,5 @@ class DiaryEntryResponse(DiaryEntryBase):
     """Schema for the API response representing a diary entry."""
     id: int
     created_at: datetime
-
-    class Config:
-        """Pydantic configuration class."""
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
