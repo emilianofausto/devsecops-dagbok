@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:8000/api/entries';
+const API_BASE_URL = '/api/entries';
 
 // DOM Selectors
 const diaryForm = document.getElementById('diary-form');
