@@ -95,15 +95,15 @@ def delete_entry(entry_id: int, db: Session = Depends(get_db)):
     return {"message": f"Entry {entry_id} successfully deleted"}
 
 
-if os.path.exists("/app/frontend"):
-    frontend_dir = "/app/frontend"
+if os.path.exists("/app/frontend/src"):
+    # Production (Container Docker in Render)
+    frontend_dir = "/app/frontend/src"
 else:
+    # Local environment y GitHub Actions
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    frontend_dir = os.path.abspath(os.path.join(current_dir, "..", "..", "frontend"))
-
+    frontend_dir = os.path.abspath(os.path.join(current_dir, "..", "..", "frontend", "src"))
 
 print(f"Ruta final asignada al frontend: {frontend_dir}", flush=True)
-print(f"¿Existe la ruta final?: {os.path.exists(frontend_dir)}", flush=True)
-
+print(f"¿Existe la ruta final con src?: {os.path.exists(frontend_dir)}", flush=True)
 
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
