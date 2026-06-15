@@ -18,6 +18,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 @pytest.fixture(name="db_session")
 def fixture_db_session():
     """Builds and tears down a clean database schema for each independent test."""
+    # Force table creation explicitly inside the local test in-memory engine
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     try:
@@ -34,8 +35,14 @@ def fixture_client(db_session):
             yield db_session
         finally:
             pass
+
+    # Bind the dependency override to intercept get_db calls during requests
     app.dependency_overrides[get_db] = _get_test_db
+    
+    from app.database import engine as app_engine
     Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=app_engine)
+
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
