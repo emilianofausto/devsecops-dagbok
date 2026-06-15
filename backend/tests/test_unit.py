@@ -35,6 +35,7 @@ def fixture_client(db_session):
         finally:
             pass
     app.dependency_overrides[get_db] = _get_test_db
+    Base.metadata.create_all(bind=engine)
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()

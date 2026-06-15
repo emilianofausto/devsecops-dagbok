@@ -152,7 +152,7 @@ jobs:
   run-unit-tests:
     name: Run Unit Tests (Pytest)
     runs-on: ubuntu-latest
-    needs: [code-quality, security-sast]
+    needs: [security-sast, code-quality]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
