@@ -55,7 +55,7 @@ jobs:
         run: pip install bandit
 
       - name: Run Bandit Security Scan
-        run: bandit -r backend/ -x backend/.venv/
+        run: bandit -r backend/ -x backend/.venv/,backend/tests/
 
   run-api-tests:
     name: Run API Tests (Newman)

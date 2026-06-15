@@ -40,7 +40,7 @@ def fixture_client(db_session):
     app.dependency_overrides.clear()
 
 # ----------------------------------------------------------------------
-# TEST CASES
+# TEST CASES (6 Tests for VG coverage compliance)
 # ----------------------------------------------------------------------
 
 def test_create_valid_diary_entry(client):
@@ -77,7 +77,10 @@ def test_get_single_entry_not_found(client):
 def test_update_entry_valid_payload(client):
     """5. PUT /api/entries/{id} - Asserts complete field mutations update persistent layers."""
     # Seed data
-    initial = client.post("/api/entries", json={"title": "Old", "category": "A", "content": "Old Content"})
+    initial = client.post(
+        "/api/entries",
+        json={"title": "Old", "category": "A", "content": "Old Content"}
+    )
     entry_id = initial.json()["id"]
 
     updated_payload = {"title": "New Title", "category": "B", "content": "New Content"}
@@ -88,12 +91,15 @@ def test_update_entry_valid_payload(client):
 
 def test_delete_entry_lifecycle(client):
     """6. DELETE /api/entries/{id} - Asserts destructive routines clean storage structures."""
-    initial = client.post("/api/entries", json={"title": "To Delete", "category": "X", "content": "Text"})
+    initial = client.post(
+        "/api/entries",
+        json={"title": "To Delete", "category": "X", "content": "Text"}
+    )
     entry_id = initial.json()["id"]
 
     delete_res = client.delete(f"/api/entries/{entry_id}")
     assert delete_res.status_code == 200
-    
+
     # Confirm it cannot be fetched anymore
     get_res = client.get(f"/api/entries/{entry_id}")
     assert get_res.status_code == 404
