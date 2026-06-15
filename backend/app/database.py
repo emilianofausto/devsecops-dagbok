@@ -1,5 +1,6 @@
+import datetime
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./dagbok.db")
@@ -19,7 +20,7 @@ class DiaryEntryModel(Base):
     title = Column(String(100), nullable=False)
     content = Column(Text, nullable=False)
     category = Column(String(50), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
 def get_db():
     db = SessionLocal()
