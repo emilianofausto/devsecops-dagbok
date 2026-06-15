@@ -11,21 +11,6 @@ from app.schemas import DiaryEntryCreate, DiaryEntryUpdate, DiaryEntryResponse
 # Create database tables on application start
 Base.metadata.create_all(bind=engine)
 
-
-
-
-# --- BLOQUE DE DIAGNÓSTICO EN LOGS ---
-print("======= DIAGNÓSTICO DE RUTAS EN PRODUCCIÓN =======", flush=True)
-print(f"Directorio de ejecución actual (cwd): {os.getcwd()}", flush=True)
-print(f"Contenido de /app: {os.listdir('/app') if os.path.exists('/app') else 'No existe /app'}", flush=True)
-if os.path.exists('/app/frontend'):
-    print(f"Contenido de /app/frontend: {os.listdir('/app/frontend')}", flush=True)
-# --------------------------------------
-
-
-
-
-
 app = FastAPI(title="DevSecOps Diary API")
 
 # Enable CORS for frontend integration
@@ -94,7 +79,6 @@ def delete_entry(entry_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": f"Entry {entry_id} successfully deleted"}
 
-
 if os.path.exists("/app/frontend/src"):
     # Production (Container Docker in Render)
     frontend_dir = "/app/frontend/src"
@@ -102,8 +86,5 @@ else:
     # Local environment y GitHub Actions
     current_dir = os.path.dirname(os.path.abspath(__file__))
     frontend_dir = os.path.abspath(os.path.join(current_dir, "..", "..", "frontend", "src"))
-
-print(f"Ruta final asignada al frontend: {frontend_dir}", flush=True)
-print(f"¿Existe la ruta final con src?: {os.path.exists(frontend_dir)}", flush=True)
 
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
