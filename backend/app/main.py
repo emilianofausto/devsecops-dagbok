@@ -79,6 +79,11 @@ def delete_entry(entry_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": f"Entry {entry_id} successfully deleted"}
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-frontend_dir = os.path.abspath(os.path.join(current_dir, "..", "..", "frontend"))
+
+if os.path.exists("/app/frontend"):
+    frontend_dir = "/app/frontend"
+else:
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    frontend_dir = os.path.abspath(os.path.join(current_dir, "..", "..", "frontend"))
+
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
