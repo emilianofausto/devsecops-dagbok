@@ -42,7 +42,7 @@ jobs:
           cd backend
           pylint $(find . -name "*.py" -not -path "*/\.*")
 
-  security-sast:
+  security-steps:
     name: Security Linting (Bandit)
     runs-on: ubuntu-latest
     steps:
@@ -60,10 +60,19 @@ jobs:
       - name: Run Bandit Security Scan
         run: bandit -r backend/ -x backend/.venv/,backend/tests/
 
+      - name: Install Dependency Audit
+        run: pip install pip-audit
+
+      - name: Run Dependency Audit
+        run: pip-audit -r backend/requirements.txt
+
+      - name: Run NPM Audit
+        run: npm audit --audit-level=high
+
   run-api-tests:
     name: Run API Tests (Newman)
     runs-on: ubuntu-latest
-    needs: [security-sast, code-quality]
+    needs: [security-steps, code-quality]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -119,7 +128,7 @@ jobs:
   run-e2e-tests:
     name: Run E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    needs: [security-sast, code-quality]
+    needs: [security-steps, code-quality]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -155,7 +164,7 @@ jobs:
   run-unit-tests:
     name: Run Unit Tests (Pytest)
     runs-on: ubuntu-latest
-    needs: [security-sast, code-quality]
+    needs: [security-steps, code-quality]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
