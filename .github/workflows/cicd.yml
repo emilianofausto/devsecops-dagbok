@@ -91,7 +91,7 @@ jobs:
             PYTHONPATH: "${{ github.workspace }}/backend"
         run: |
           cd backend
-          uvicorn main:app --host 127.0.0.1 --port 8000 &
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
 
       - name: API Health Check Verification Loop
         run: |
