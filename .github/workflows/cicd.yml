@@ -66,13 +66,25 @@ jobs:
       - name: Run Dependency Audit
         run: pip-audit -r backend/requirements.txt
 
+  security-audit-frontend:
+    name: Security NPM Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Run NPM Audit
         run: npm audit --audit-level=high
 
   run-api-tests:
     name: Run API Tests (Newman)
     runs-on: ubuntu-latest
-    needs: [security-steps, code-quality]
+    needs: [security-steps, security-audit-frontend, code-quality]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -128,7 +140,7 @@ jobs:
   run-e2e-tests:
     name: Run E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    needs: [security-steps, code-quality]
+    needs: [security-steps, security-audit-frontend, code-quality]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -164,7 +176,7 @@ jobs:
   run-unit-tests:
     name: Run Unit Tests (Pytest)
     runs-on: ubuntu-latest
-    needs: [security-steps, code-quality]
+    needs: [security-steps, security-audit-frontend, code-quality]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
