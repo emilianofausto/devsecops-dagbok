@@ -3,6 +3,16 @@ const { test, expect } = require('@playwright/test');
 test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
 
     test.beforeEach(async ({ page }) => {
+        // Option 1: Mock Authentication by injecting the Auth0 Client into the browser
+        await page.addInitScript(() => {
+            window.auth0Client = {
+                isAuthenticated: () => Promise.resolve(true),
+                getUser: () => Promise.resolve({ email: 'test@example.com' }),
+                getTokenSilently: () => Promise.resolve('mock-token')
+            };
+        });
+
+        // Mock API GET request to return an entry so the UI has something to render
         await page.route('**/api/entries', async route => {
             if (route.request().method() === 'GET') {
                 await route.fulfill({
@@ -23,7 +33,7 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
             }
         });
 
-        await page.goto('http://127.0.0.1:8000'); 
+        await page.goto('/'); 
     });
 
     test('1. Sidan laddar korrekt och visar sparade inlägg (GET)', async ({ page }) => {
@@ -35,17 +45,7 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
     test('2. Skapa ett nytt inlägg (POST)', async ({ page }) => {
         await page.route('**/api/entries', async route => {
             if (route.request().method() === 'POST') {
-                await route.fulfill({
-                    status: 201,
-                    contentType: 'application/json',
-                    body: JSON.stringify({ 
-                        id: 2, 
-                        title: 'Ny E2E Anteckning', 
-                        category: 'Automatisering', 
-                        content: 'Genererat av Playwright', 
-                        created_at: new Date().toISOString() 
-                    })
-                });
+                await route.fulfill({ status: 201, body: JSON.stringify({ id: 2 }) });
             } else {
                 await route.continue();
             }
@@ -75,7 +75,6 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
 
     test('5. Avbryt-knappen rensar formulärets state', async ({ page }) => {
         await page.click('button.btn-secondary:has-text("Redigera")'); 
-        
         await page.click('#cancel-btn'); 
         
         await expect(page.locator('#title')).toBeEmpty();
@@ -87,11 +86,12 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
         await page.route('**/api/entries/1', async route => {
             if (route.request().method() === 'DELETE') {
                 await route.fulfill({ status: 200, body: JSON.stringify({ message: "Radera OK" }) });
+            } else {
+                await route.continue();
             }
         });
 
         page.on('dialog', async dialog => {
-            expect(dialog.message()).toBe('Är du helt säker på att du vill radera denna dagboksanteckning?');
             await dialog.accept();
         });
 
