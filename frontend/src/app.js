@@ -13,7 +13,8 @@ const configureAuth0 = async () => {
     domain: 'floki-security.us.auth0.com',
     clientId: 'NQXqkUzGh1Mh1X3NXFE4OCbR9XlYp8TU',
     authorizationParams: {
-      redirect_uri: window.location.origin
+      redirect_uri: window.location.origin,
+      audience: 'https://floki-security.us.auth0.com/api/v2/' 
     }
   });
 
