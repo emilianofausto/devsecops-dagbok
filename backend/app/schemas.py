@@ -1,8 +1,3 @@
-"""
-Pydantic schemas for the DevSecOps Diary API.
-Provides data validation and serialization for API requests and responses.
-"""
-
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
@@ -14,7 +9,8 @@ class DiaryEntryBase(BaseModel):
     category: str = Field(..., min_length=1, max_length=50, description="Category cannot be empty")
 
 class DiaryEntryCreate(DiaryEntryBase):
-    """Schema for creating a new diary entry."""
+    """Schema for creating a new diary entry. (user_id intentionally omitted to prevent tampering)"""
+    pass
 
 class DiaryEntryUpdate(BaseModel):
     """Schema for updating an existing diary entry. All fields are optional."""
@@ -25,6 +21,7 @@ class DiaryEntryUpdate(BaseModel):
 class DiaryEntryResponse(DiaryEntryBase):
     """Schema for the API response representing a diary entry."""
     id: int
+    user_id: str
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
