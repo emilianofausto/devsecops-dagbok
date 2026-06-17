@@ -35,7 +35,7 @@ app.add_middleware(
 # Security Validator
 def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)) -> str:
     """
-    Validates the JWT token provided in the Authorization header 
+    Validates the JWT token provided in the Authorization header
     and returns the 'sub' (User ID) claim.
     """
     token = credentials.credentials
@@ -43,19 +43,19 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
         payload = jwt.decode(
             token,
             options={
-                "verify_signature": False, 
+                "verify_signature": False,
                 "verify_exp": False,
                 "verify_nbf": False,
                 "verify_iat": False
             }
         )
-        
+
         user_id = payload.get("sub")
         if not user_id:
             raise ValueError("El token no contiene el claim 'sub'")
-            
+
         return user_id
-        
+
     except Exception as e:
         print(f"Auth Error: {e}")
         raise HTTPException(
@@ -64,28 +64,39 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
         ) from e
 
 @app.get(
-    "/api/entries", 
+    "/api/entries",
     response_model=List[DiaryEntryResponse],
     status_code=status.HTTP_200_OK
 )
-def get_all_entries(db: Session = Depends(get_db), current_user: str = Depends(verify_token)):
+def get_all_entries(
+    db: Session = Depends(get_db),
+    current_user: str = Depends(verify_token)
+):
     """Retrieve all diary entries belonging strictly to the authenticated user."""
     return db.query(DiaryEntryModel).filter(DiaryEntryModel.user_id == current_user).all()
 
 @app.get("/api/entries/{entry_id}", response_model=DiaryEntryResponse)
-def get_single_entry(entry_id: int, db: Session = Depends(get_db), current_user: str = Depends(verify_token)):
+def get_single_entry(
+    entry_id: int,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(verify_token)
+):
     """Retrieve a single diary entry by ID, validating ownership."""
     entry = db.query(DiaryEntryModel).filter(
-        DiaryEntryModel.id == entry_id, 
+        DiaryEntryModel.id == entry_id,
         DiaryEntryModel.user_id == current_user
     ).first()
-    
+
     if not entry:
         raise HTTPException(status_code=404, detail="Entry not found")
     return entry
 
 @app.post("/api/entries", response_model=DiaryEntryResponse, status_code=201)
-def create_entry(entry_data: DiaryEntryCreate, db: Session = Depends(get_db), current_user: str = Depends(verify_token)):
+def create_entry(
+    entry_data: DiaryEntryCreate,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(verify_token)
+):
     """Create a new diary entry injected with the authenticated user's ID."""
     new_entry = DiaryEntryModel(**entry_data.model_dump(), user_id=current_user)
     db.add(new_entry)
@@ -94,16 +105,21 @@ def create_entry(entry_data: DiaryEntryCreate, db: Session = Depends(get_db), cu
     return new_entry
 
 @app.put("/api/entries/{entry_id}", response_model=DiaryEntryResponse)
-def update_entry(entry_id: int, entry_data: DiaryEntryUpdate, db: Session = Depends(get_db), current_user: str = Depends(verify_token)):
+def update_entry(
+    entry_id: int,
+    entry_data: DiaryEntryUpdate,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(verify_token)
+):
     """Update an existing diary entry, strictly validating ownership."""
     entry = db.query(DiaryEntryModel).filter(
-        DiaryEntryModel.id == entry_id, 
+        DiaryEntryModel.id == entry_id,
         DiaryEntryModel.user_id == current_user
     ).first()
-    
+
     if not entry:
         raise HTTPException(status_code=404, detail="Entry not found")
-        
+
     for key, value in entry_data.model_dump(exclude_unset=True).items():
         setattr(entry, key, value)
     db.commit()
@@ -111,16 +127,20 @@ def update_entry(entry_id: int, entry_data: DiaryEntryUpdate, db: Session = Depe
     return entry
 
 @app.delete("/api/entries/{entry_id}")
-def delete_entry(entry_id: int, db: Session = Depends(get_db), current_user: str = Depends(verify_token)):
+def delete_entry(
+    entry_id: int,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(verify_token)
+):
     """Delete a diary entry by ID, strictly validating ownership."""
     entry = db.query(DiaryEntryModel).filter(
-        DiaryEntryModel.id == entry_id, 
+        DiaryEntryModel.id == entry_id,
         DiaryEntryModel.user_id == current_user
     ).first()
-    
+
     if not entry:
         raise HTTPException(status_code=404, detail="Entry not found")
-        
+
     db.delete(entry)
     db.commit()
     return {"message": "Entry successfully deleted"}

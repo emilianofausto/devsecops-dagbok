@@ -1,3 +1,6 @@
+"""
+Database configuration and SQLAlchemy models for the DevSecOps Diary API.
+"""
 import datetime
 import os
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
@@ -17,16 +20,20 @@ class DiaryEntryModel(Base):
     """
     SQLAlchemy ORM model representing a diary entry in the database.
     """
+    # pylint: disable=too-few-public-methods
     __tablename__ = "diary_entries"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String(100), nullable=False, index=True) # <- Nuevo campo indexado
+    user_id = Column(String(100), nullable=False, index=True)
     title = Column(String(100), nullable=False)
     content = Column(Text, nullable=False)
     category = Column(String(50), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.datetime.now(datetime.timezone.utc))
 
 def get_db():
+    """
+    Dependency function to generate and yield a database session.
+    """
     db = SessionLocal()
     try:
         yield db
