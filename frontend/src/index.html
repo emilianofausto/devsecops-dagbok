@@ -5,12 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevSecOps Dagbok</title>
     <link rel="stylesheet" href="styles.css">
+    <script defer src="https://cdn.auth0.com/js/auth0-spa-js/2.18/auth0-spa-js.production.js"></script>
+    <script defer src="app.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Min Digitala Dagbok</h1>
             <p>DevSecOps VT26 - Inlämningsuppgift</p>
+            
+            <div id="auth-controls">
+                <div id="view-unauthenticated" style="display: none;">
+                    <button onclick="auth0Client.loginWithRedirect()" class="btn btn-primary">Login</button>
+                </div>
+                <div id="view-authenticated" style="display: none;">
+                    <p>Logged in as <span id="user-email"></span></p>
+                    <button onclick="auth0Client.logout({ logoutParams: { returnTo: window.location.origin } })" class="btn btn-secondary">Logout</button>
+                </div>
+            </div>
         </header>
 
         <div id="error-banner" class="error-banner" style="display: none;"></div>

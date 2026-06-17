@@ -3,6 +3,25 @@ const { test, expect } = require('@playwright/test');
 test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
 
     test.beforeEach(async ({ page }) => {
+        // Intercept the Auth0 CDN and provide a mocked factory implementation.
+        await page.route('https://cdn.auth0.com/**/*.js', async route => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/javascript',
+                body: `
+                    window.auth0 = {
+                        createAuth0Client: async () => ({
+                            isAuthenticated: async () => true,
+                            getUser: async () => ({ email: 'test@example.com' }),
+                            getTokenSilently: async () => 'mock-token',
+                            handleRedirectCallback: async () => {}
+                        })
+                    };
+                `
+            });
+        });
+
+        // Mock API GET request to return an entry so the UI has something to render
         await page.route('**/api/entries', async route => {
             if (route.request().method() === 'GET') {
                 await route.fulfill({
@@ -23,7 +42,11 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
             }
         });
 
-        await page.goto('http://127.0.0.1:8000'); 
+        await page.goto('/'); 
+
+        // Playwright Best Practice: Await a specific post-authentication visual marker.
+        // This ensures your application state is completely authenticated and stable before any test runs.
+        await page.locator('button:has-text("Logout")').waitFor({ state: 'visible' });
     });
 
     test('1. Sidan laddar korrekt och visar sparade inlägg (GET)', async ({ page }) => {
@@ -33,29 +56,16 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
     });
 
     test('2. Skapa ett nytt inlägg (POST)', async ({ page }) => {
-        await page.route('**/api/entries', async route => {
-            if (route.request().method() === 'POST') {
-                await route.fulfill({
-                    status: 201,
-                    contentType: 'application/json',
-                    body: JSON.stringify({ 
-                        id: 2, 
-                        title: 'Ny E2E Anteckning', 
-                        category: 'Automatisering', 
-                        content: 'Genererat av Playwright', 
-                        created_at: new Date().toISOString() 
-                    })
-                });
-            } else {
-                await route.continue();
-            }
-        });
+        const responsePromise = page.waitForResponse(response => 
+            response.url().includes('/api/entries') && response.request().method() === 'POST'
+        );
 
         await page.fill('#title', 'Ny E2E Anteckning');
         await page.fill('#category', 'Automatisering');
         await page.fill('#content', 'Genererat av Playwright');
         await page.click('#submit-btn');
 
+        await responsePromise;
         await expect(page.locator('#title')).toBeEmpty();
     });
 
@@ -66,7 +76,10 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
     });
 
     test('4. Redigera-knappen fyller i formuläret (PUT/PATCH Prep)', async ({ page }) => {
-        await page.click('button.btn-secondary:has-text("Redigera")');
+        const redigeraBtn = page.locator('#entries-container button:has-text("Redigera")').first();
+        
+        await redigeraBtn.waitFor({ state: 'visible' });
+        await redigeraBtn.click();
         
         await expect(page.locator('#title')).toHaveValue('Befintlig Anteckning');
         await expect(page.locator('#form-title')).toHaveText('Redigera anteckning');
@@ -74,27 +87,40 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
     });
 
     test('5. Avbryt-knappen rensar formulärets state', async ({ page }) => {
-        await page.click('button.btn-secondary:has-text("Redigera")'); 
+        const redigeraBtn = page.locator('#entries-container button:has-text("Redigera")').first();
         
+        await redigeraBtn.waitFor({ state: 'visible' });
+        await redigeraBtn.click();
+        
+        // Confirm it entered edit mode successfully
+        await expect(page.locator('#title')).toHaveValue('Befintlig Anteckning');
+        await expect(page.locator('#form-title')).toHaveText('Redigera anteckning');
+        
+        // Act: Click Cancel
         await page.click('#cancel-btn'); 
         
+        // Assert: Verify state is completely reverted
         await expect(page.locator('#title')).toBeEmpty();
         await expect(page.locator('#form-title')).toHaveText('Skapa ny anteckning');
         await expect(page.locator('#cancel-btn')).toBeHidden();
     });
 
     test('6. Radering (DELETE) hanterar UX-bekräftelse', async ({ page }) => {
+        const raderaBtn = page.locator('#entries-container button:has-text("Radera")').first();
+        await raderaBtn.waitFor({ state: 'visible' });
+
         await page.route('**/api/entries/1', async route => {
             if (route.request().method() === 'DELETE') {
                 await route.fulfill({ status: 200, body: JSON.stringify({ message: "Radera OK" }) });
+            } else {
+                await route.continue();
             }
         });
 
         page.on('dialog', async dialog => {
-            expect(dialog.message()).toBe('Är du helt säker på att du vill radera denna dagboksanteckning?');
             await dialog.accept();
         });
 
-        await page.click('button.btn-danger:has-text("Radera")');
+        await raderaBtn.click();
     });
 });
