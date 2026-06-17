@@ -143,4 +143,12 @@ async function deleteEntry(id) {
 
 function resetFormState() { isEditing = false; diaryForm.reset(); cancelBtn.style.display = 'none'; }
 function escapeHTML(str) { return str.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[t])); }
-function escapeQuotes(str) { return str.replace(/'/g, "\\'"); }
+function escapeQuotes(str) {
+    // 1. Escape the backslash first
+    // 2. Escape the single quote
+    // 3. Escape the double quote
+    return str
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;');
+}
