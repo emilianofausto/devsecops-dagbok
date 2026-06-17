@@ -41,6 +41,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
         payload = jwt.get_unverified_claims(token)
         return payload
     except Exception as e:
+        print(f"Auth Error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

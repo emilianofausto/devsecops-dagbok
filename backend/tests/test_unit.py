@@ -19,7 +19,11 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-AUTH_HEADERS = {"Authorization": "Bearer mock-token"}
+# A dummy JWT: Header.Payload.Signature
+# Payload: {"sub": "1234567890", "name": "Test User"}
+AUTH_HEADERS = {
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciJ9.signature"
+}
 
 @pytest.fixture(name="db_session")
 def fixture_db_session():
