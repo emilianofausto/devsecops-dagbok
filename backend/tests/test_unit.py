@@ -1,5 +1,6 @@
 """
 Automated Backend Unit Tests for DevSecOps Diary API.
+Validates core CRUD logic, schema compliance, and status codes.
 """
 import pytest
 from fastapi.testclient import TestClient
@@ -18,11 +19,11 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Constant for headers
 AUTH_HEADERS = {"Authorization": "Bearer mock-token"}
 
 @pytest.fixture(name="db_session")
 def fixture_db_session():
+    """Builds and tears down a clean database schema."""
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     try:
@@ -33,8 +34,10 @@ def fixture_db_session():
 
 @pytest.fixture(name="client")
 def fixture_client(db_session):
+    """Overrides the FastAPI dependency injection context."""
     def _get_test_db():
         yield db_session
+
     app.dependency_overrides[get_db] = _get_test_db
     with TestClient(app) as test_client:
         yield test_client
@@ -53,7 +56,6 @@ def test_create_valid_diary_entry(client):
 def test_create_invalid_entry_empty_fields(client):
     """2. POST /api/entries - Asserts validation rejects empty payloads."""
     payload = {"title": "", "category": "DevSecOps", "content": ""}
-    # Note: If verify_token runs first, you need headers here too
     response = client.post("/api/entries", json=payload, headers=AUTH_HEADERS)
     assert response.status_code == 422
 
@@ -70,7 +72,10 @@ def test_get_single_entry_not_found(client):
 
 def test_update_entry_valid_payload(client):
     """5. PUT /api/entries/{id} - Asserts updates persist."""
-    initial = client.post("/api/entries", json={"title": "Old", "category": "A", "content": "Old"}, headers=AUTH_HEADERS)
+    initial_payload = {"title": "Old", "category": "A", "content": "Old"}
+    initial = client.post(
+        "/api/entries", json=initial_payload, headers=AUTH_HEADERS
+    )
     entry_id = initial.json()["id"]
 
     payload = {"title": "New", "category": "B", "content": "New"}
@@ -80,10 +85,13 @@ def test_update_entry_valid_payload(client):
 
 def test_delete_entry_lifecycle(client):
     """6. DELETE /api/entries/{id} - Asserts deletion cleans storage."""
-    initial = client.post("/api/entries", json={"title": "Del", "category": "X", "content": "X"}, headers=AUTH_HEADERS)
+    payload = {"title": "Del", "category": "X", "content": "X"}
+    initial = client.post("/api/entries", json=payload, headers=AUTH_HEADERS)
     entry_id = initial.json()["id"]
 
-    delete_res = client.delete(f"/api/entries/{entry_id}", headers=AUTH_HEADERS)
+    delete_res = client.delete(
+        f"/api/entries/{entry_id}", headers=AUTH_HEADERS
+    )
     assert delete_res.status_code == 200
 
     get_res = client.get(f"/api/entries/{entry_id}", headers=AUTH_HEADERS)
