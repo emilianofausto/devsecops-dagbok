@@ -48,7 +48,7 @@ jobs:
       - name: Run Pylint
         run: |
           cd backend
-          pylint --extension-pkg-whitelist=auth0-fastapi $(find . -name "*.py" -not -path "*/\.*")
+          pylint $(find . -name "*.py" -not -path "*/\.*")
 
   security-steps:
     name: Security Linting (Bandit)

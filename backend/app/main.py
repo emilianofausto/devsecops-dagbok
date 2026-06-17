@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
-from auth0_fastapi import Auth0
+from auth0_fastapi import Auth0 # pylint: disable=no-name-in-module
 
 from app.database import Base, engine, get_db, DiaryEntryModel
 from app.schemas import DiaryEntryCreate, DiaryEntryUpdate, DiaryEntryResponse
