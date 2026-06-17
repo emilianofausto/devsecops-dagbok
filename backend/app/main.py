@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from jose import jwt # Requires python-jose[cryptography]
+from jose import jwt
 
 from app.database import Base, engine, get_db, DiaryEntryModel
 from app.schemas import DiaryEntryCreate, DiaryEntryUpdate, DiaryEntryResponse
@@ -97,5 +97,7 @@ def delete_entry(entry_id: int, db: Session = Depends(get_db)):
     return {"message": "Entry successfully deleted"}
 
 # Mount Frontend static files
-FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "src"))
+# Break the path join into two lines to fix C0301
+CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.abspath(os.path.join(CURRENT_PATH, "..", "..", "frontend", "src"))
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="static")
