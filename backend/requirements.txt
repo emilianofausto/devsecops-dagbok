@@ -39,7 +39,6 @@ platformdirs==4.9.6
 pluggy==1.6.0
 psycopg2-binary==2.9.10
 py-serializable==1.1.2
-pyasn1==0.6.3
 pycparser==3.0
 pydantic==2.13.4
 pydantic_core==2.46.4
@@ -49,7 +48,7 @@ pylint==3.3.4
 pyparsing==3.3.2
 pytest==9.1.0
 python-dotenv==1.2.2
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.4.0
 requests==2.34.2
 rich==15.0.0
 rsa==4.9.1
