@@ -25,7 +25,7 @@ AUTH_HEADERS = {
     "Authorization": (
         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
         "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciJ9."
-        "signature"
+        "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
     )
 }
 
