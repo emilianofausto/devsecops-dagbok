@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infrastruktur och Deployment</title>
+<style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 2rem; background: #f9f9f9; }
+    h1, h2 { color: #2c3e50; }
+    h1 { border-bottom: 2px solid #2c3e50; padding-bottom: 0.5rem; }
+    h2 { margin-top: 2rem; border-bottom: 1px solid #ccc; padding-bottom: 0.3rem; }
+    ul { padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    .note { background: #eef2f5; border-left: 4px solid #3498db; padding: 1rem; margin-top: 1rem; border-radius: 0 4px 4px 0; }
+</style>
+</head>
+<body>
+
+<h1>Infrastruktur och Deployment</h1>
+<p>Det här dokumentet förklarar hur appen är uppsatt för databas, deployment och kodsäkerhet.</p>
+
+<h2>1. Databas i Produktionen (Neon)</h2>
+<p>När appen körs i produktion används <strong>Neon</strong>, en serverless PostgreSQL-databas.</p>
+<ul>
+    <li><strong>Fördelar:</strong> Det är gratis (Free Tier) och väldigt lätt att använda. Neon ger en "Connection String" som enkelt kan klistras in som en miljövariabel (secret) i hostning-tjänsten (som Render).</li>
+    <li><strong>Nackdelar:</strong> På gratisversionen finns det begränsningar. Den största nackdelen är "Scale-to-zero", vilket betyder att databasen pausar sig själv om den är inaktiv i 5 minuter. När den ska vakna upp igen vid första användningen, kan det ta lite tid (ibland upp till 1 minut i värsta fall) för att starta.</li>
+</ul>
+<div class="note">
+    <em>OBS: Under enhetstestning i GitHub Actions används istället en lokal MySQL-databas, så vi rör inte produktionsdatabasen när vi testar koden.</em>
+</div>
+
+<h2>2. CI/CD och Hosting (Render)</h2>
+<p>Appen hostas på <strong>Render</strong>, via deras Free Tier.</p>
+<ul>
+    <li><strong>CI/CD Pipeline:</strong> När ny kod mergeas till main-branchen och går igenom alla tester i GitHub Actions (Continuous Integration), byggs en Docker-image.</li>
+    <li><strong>Deployment:</strong> Render är inställt för att sedan rulla ut vår kod.</li>
+    <li><strong>Miljövariabler:</strong> Inne i Render har jag lagt till hemligheter (secrets), och en av dessa är kopplingssträngen (connection string) till Neon-databasen. På det sättet kan backend prata med rätt databas säkert.</li>
+</ul>
+
+<h2>3. Säkerhet i GitHub (Branch Protection)</h2>
+<p>För att jobba säkert enligt DevSecOps har jag skyddat <code>main</code>-branchen i GitHub. Baserat på bevisen i projektet har jag satt upp reglerna:</p>
+<ul>
+    <li><strong>Ingen direkt push:</strong> Det går inte att pusha kod direkt till main. Man måste skapa en ny branch och göra en Pull Request (PR).</li>
+    <li><strong>Krav på Code Review:</strong> Ändringar måste granskas innan de kan slås ihop (merge).</li>
+    <li><strong>Status Checks:</strong> Alla våra automatiserade tester (som Pylint, Bandit, Newman, Playwright etc.) måste passera grönt och lyckas innan koden tillåts i main.</li>
+    <li><strong>Ingen force push eller radering:</strong> För att skydda historiken.</li>
+</ul>
+
+</body>
+</html>
