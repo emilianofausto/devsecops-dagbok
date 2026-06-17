@@ -13,8 +13,6 @@ module.exports = defineConfig({
   reporter: 'html',
   
   use: {
-    // CRITICAL: Point this to your Frontend Web Server port (e.g., Vite/Node), NOT the FastAPI backend.
-    // When tests execute page.goto('/'), they will land on the actual UI.
     baseURL: 'http://127.0.0.1:3000', 
     trace: 'on-first-retry',
   },
@@ -26,12 +24,10 @@ module.exports = defineConfig({
     }
   ],
 
-  // Playwright's built-in web server to spin up the FRONTEND application locally.
-  // The backend server (Uvicorn) is already managed and started by your git pre-push hook.
   webServer: {
-    command: 'npm run dev', // Command to start your frontend development server
+    command: 'npm --prefix frontend run dev', 
     url: 'http://127.0.0.1:3000',
-    reuseExistingServer: !process.env.CI, // Reuse local running instances during local dev
+    reuseExistingServer: !process.env.CI,
     timeout: 60000,
   },
 });
