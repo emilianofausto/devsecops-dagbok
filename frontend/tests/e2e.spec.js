@@ -63,7 +63,7 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
         await page.click('#submit-btn');
 
         await responsePromise;
-        await expect(page.locator('#title')).toBeEmpty();
+        await expect(page.locator('#title')).toHaveValue('', { timeout: 3000 });
     });
 
     test('3. Formuläret blockeras av HTML5-validering vid tomma fält', async ({ page }) => {
