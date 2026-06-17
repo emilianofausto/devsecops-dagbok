@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from jose import jwt
+import jwt
 
 from app.database import Base, engine, get_db, DiaryEntryModel
 from app.schemas import DiaryEntryCreate, DiaryEntryUpdate, DiaryEntryResponse
@@ -38,7 +38,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
     token = credentials.credentials
     try:
         # Decode the token (In a full production setup, validate against JWKS)
-        payload = jwt.get_unverified_claims(token)
+        payload = jwt.decode(token, options={"verify_signature": False})
         return payload
     except Exception as e:
         print(f"Auth Error: {e}")
