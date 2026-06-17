@@ -141,7 +141,13 @@ async function deleteEntry(id) {
     } catch (error) { displayError(error.message); }
 }
 
-function resetFormState() { isEditing = false; diaryForm.reset(); cancelBtn.style.display = 'none'; }
+function resetFormState() { 
+    isEditing = false; 
+    diaryForm.reset(); 
+    formTitle.textContent = 'Skapa ny anteckning';
+    cancelBtn.style.display = 'none'; 
+}
+
 function escapeHTML(str) { return str.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[t])); }
 function escapeQuotes(str) {
     // 1. Escape the backslash first
@@ -152,3 +158,13 @@ function escapeQuotes(str) {
         .replace(/'/g, "\\'")
         .replace(/"/g, '&quot;');
 }
+
+window.populateEditForm = function(id, title, category, content) {
+    isEditing = true;
+    formTitle.textContent = 'Redigera anteckning';
+    entryIdInput.value = id;
+    titleInput.value = title;
+    categoryInput.value = category;
+    contentInput.value = content;
+    cancelBtn.style.display = 'inline-block';
+};
