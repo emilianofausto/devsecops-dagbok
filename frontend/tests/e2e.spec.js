@@ -3,13 +3,23 @@ const { test, expect } = require('@playwright/test');
 test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
 
     test.beforeEach(async ({ page }) => {
-        // Option 1: Mock Authentication by injecting the Auth0 Client into the browser
-        await page.addInitScript(() => {
-            window.auth0Client = {
-                isAuthenticated: () => Promise.resolve(true),
-                getUser: () => Promise.resolve({ email: 'test@example.com' }),
-                getTokenSilently: () => Promise.resolve('mock-token')
-            };
+        // Intercept the Auth0 CDN and provide a mocked factory implementation.
+        // This prevents the app's configureAuth0() from overwriting the test state.
+        await page.route('https://cdn.auth0.com/**/*.js', async route => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/javascript',
+                body: `
+                    window.auth0 = {
+                        createAuth0Client: async () => ({
+                            isAuthenticated: async () => true,
+                            getUser: async () => ({ email: 'test@example.com' }),
+                            getTokenSilently: async () => 'mock-token',
+                            handleRedirectCallback: async () => {}
+                        })
+                    };
+                `
+            });
         });
 
         // Mock API GET request to return an entry so the UI has something to render
