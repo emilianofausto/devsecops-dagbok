@@ -44,7 +44,6 @@ pycparser==3.0
 pydantic==2.13.4
 pydantic_core==2.46.4
 Pygments==2.20.0
-PyJWT==2.13.0
 pylint==3.3.4
 pyparsing==3.3.2
 pytest==9.1.0
