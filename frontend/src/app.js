@@ -2,6 +2,13 @@
 window.auth0Client = null;
 
 const configureAuth0 = async () => {
+  // Defensive check to avoid ReferenceError if the Auth0 CDN takes time to parse
+  if (typeof auth0 === 'undefined') {
+    console.warn("Auth0 SDK is not available yet. Retrying...");
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return configureAuth0();
+  }
+
   window.auth0Client = await auth0.createAuth0Client({
     domain: 'floki-security.us.auth0.com',
     clientId: 'NQXqkUzGh1Mh1X3NXFE4OCbR9XlYp8TU',
@@ -32,6 +39,15 @@ const updateAuthUI = async () => {
 // Call this on app load
 window.addEventListener("load", async () => {
   await configureAuth0();
+  
+  const isAuthenticated = await window.auth0Client.isAuthenticated();
+  
+  // Force automatic redirection if no active session exists
+  if (!isAuthenticated) {
+    await window.auth0Client.loginWithRedirect();
+    return;
+  }
+  
   await updateAuthUI();
   await fetchEntries(); // Start fetching data
 });
@@ -144,7 +160,7 @@ async function deleteEntry(id) {
 function resetFormState() { 
     isEditing = false; 
     diaryForm.reset(); 
-    formTitle.textContent = 'Skapa ny anteckning';
+    formTitle.textContent = 'Skapa ny anteckning'; // Reset the form header back to default text
     cancelBtn.style.display = 'none'; 
 }
 
