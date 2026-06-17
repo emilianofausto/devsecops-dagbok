@@ -172,6 +172,9 @@
     ],
     "variable": [
         { "key": "last_entry_id", "value": "" },
-        { "key": "token", "value": "mock-token" }
+        { 
+            "key": "token", 
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkVtaWxpYW5vIEZhdXN0byIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImlhdCI6MTUxNjIzOTAyMn0.Q2G_gYmF4_E-35M3SbeDsc_66LqEka4P-J-4zIuQWjw" 
+        }
     ]
 }
