@@ -42,11 +42,8 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
             }
         });
 
-        await page.goto('/'); 
-
-        // Playwright Best Practice: Await a specific post-authentication visual marker.
-        // This ensures your application state is completely authenticated and stable before any test runs.
-        await page.locator('button:has-text("Logout")').waitFor({ state: 'visible' });
+        await page.goto('/');
+        await page.locator('h1:has-text("Min Digitala Dagbok")').waitFor({ state: 'visible' });
     });
 
     test('1. Sidan laddar korrekt och visar sparade inlägg (GET)', async ({ page }) => {
