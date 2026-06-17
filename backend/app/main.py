@@ -38,13 +38,13 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(security))
     token = credentials.credentials
     try:
         # Decode the token (In a full production setup, validate against JWKS)
-        payload = jwt.decode(token, 
+        payload = jwt.decode(token,
                              options={
-                "verify_signature": False,
-                "verify_exp": False,
-                "verify_nbf": False,
-                "verify_iat": False
-            })
+                                 "verify_signature": False,
+                                 "verify_exp": False,
+                                 "verify_nbf": False,
+                                 "verify_iat": False
+                                 })
         return payload
     except Exception as e:
         print(f"Auth Error: {e}")
