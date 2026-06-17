@@ -4,7 +4,6 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
 
     test.beforeEach(async ({ page }) => {
         // Intercept the Auth0 CDN and provide a mocked factory implementation.
-        // This prevents the app's configureAuth0() from overwriting the test state.
         await page.route('https://cdn.auth0.com/**/*.js', async route => {
             await route.fulfill({
                 status: 200,
@@ -53,7 +52,6 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
     });
 
     test('2. Skapa ett nytt inlägg (POST)', async ({ page }) => {
-        // 1. Setup route listener to wait for the POST request
         const responsePromise = page.waitForResponse(response => 
             response.url().includes('/api/entries') && response.request().method() === 'POST'
         );
@@ -63,10 +61,7 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
         await page.fill('#content', 'Genererat av Playwright');
         await page.click('#submit-btn');
 
-        // 2. Wait for the API response to complete
         await responsePromise;
-
-        // 3. NOW assert that the form has been cleared
         await expect(page.locator('#title')).toBeEmpty();
     });
 
@@ -77,6 +72,9 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
     });
 
     test('4. Redigera-knappen fyller i formuläret (PUT/PATCH Prep)', async ({ page }) => {
+        // Wait for the container to render the entry text to ensure buttons are present in the DOM
+        await expect(page.locator('#entries-container')).toContainText('Befintlig Anteckning');
+        
         await page.click('button.btn-secondary:has-text("Redigera")');
         
         await expect(page.locator('#title')).toHaveValue('Befintlig Anteckning');
@@ -85,6 +83,9 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
     });
 
     test('5. Avbryt-knappen rensar formulärets state', async ({ page }) => {
+        // Wait for the container to render the entry text to ensure buttons are present in the DOM
+        await expect(page.locator('#entries-container')).toContainText('Befintlig Anteckning');
+
         await page.click('button.btn-secondary:has-text("Redigera")'); 
         await page.click('#cancel-btn'); 
         
@@ -94,6 +95,9 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
     });
 
     test('6. Radering (DELETE) hanterar UX-bekräftelse', async ({ page }) => {
+        // Wait for the container to render the entry text to ensure buttons are present in the DOM
+        await expect(page.locator('#entries-container')).toContainText('Befintlig Anteckning');
+
         await page.route('**/api/entries/1', async route => {
             if (route.request().method() === 'DELETE') {
                 await route.fulfill({ status: 200, body: JSON.stringify({ message: "Radera OK" }) });
