@@ -36,8 +36,8 @@ pip-requirements-parser==32.0.1
 pip_audit==2.8.0
 platformdirs==4.9.6
 pluggy==1.6.0
-PyJWT[crypto]==2.10.1
-cryptography==42.0.5
+PyJWT[crypto]==2.13.0
+cryptography==44.0.0
 psycopg2-binary==2.9.10
 py-serializable==1.1.2
 pycparser==3.0
