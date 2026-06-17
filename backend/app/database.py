@@ -24,6 +24,7 @@ class DiaryEntryModel(Base):
     __tablename__ = "diary_entries"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String(100), nullable=False, index=True)
     title = Column(String(100), nullable=False)
     content = Column(Text, nullable=False)
     category = Column(String(50), nullable=False)
