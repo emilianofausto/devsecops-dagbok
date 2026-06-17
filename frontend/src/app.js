@@ -33,7 +33,13 @@ function clearError() {
 // REST GET Request Operation
 async function fetchEntries() {
     try {
-        const response = await fetch(API_BASE_URL);
+        const token = await auth0.getTokenSilently(); // Provided by Auth0 SPA SDK
+
+        const response = await fetch(API_BASE_URL, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
         if (!response.ok) throw new Error('Kunde inte hämta dagboksanteckningar från servern.');
         
         const entries = await response.json();
