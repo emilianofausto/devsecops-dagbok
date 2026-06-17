@@ -19,4 +19,11 @@ module.exports = defineConfig({
       use: { ...devices['Desktop Chrome'] },
     }
   ],
+
+  webServer: {
+    command: 'npx http-server . -p 5500', 
+    url: 'http://127.0.0.1:5500',
+    reuseExistingServer: true,
+    timeout: 30000,
+  },
 });
