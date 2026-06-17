@@ -8,7 +8,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
-from fastapi import FastAPI, Depends
 from auth0_fastapi import Auth0
 
 from app.database import Base, engine, get_db, DiaryEntryModel
@@ -28,10 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-auth0 = Auth0(
-    domain="floki-security.us.auth0.com", 
-    api_audience="https://dagbok-api"
-)
+auth0 = Auth0(domain="floki-security.us.auth0.com", api_audience="https://dagbok-api")
 
 @app.get(
     "/api/entries", dependencies=[Depends(auth0.verify)],
