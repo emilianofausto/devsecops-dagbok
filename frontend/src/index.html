@@ -12,6 +12,16 @@
         <header>
             <h1>Min Digitala Dagbok</h1>
             <p>DevSecOps VT26 - Inlämningsuppgift</p>
+            
+            <div id="auth-controls">
+                <div id="view-unauthenticated" style="display: none;">
+                    <button onclick="auth0Client.loginWithRedirect()" class="btn btn-primary">Login</button>
+                </div>
+                <div id="view-authenticated" style="display: none;">
+                    <p>Logged in as <span id="user-email"></span></p>
+                    <button onclick="auth0Client.logout({ logoutParams: { returnTo: window.location.origin } })" class="btn btn-secondary">Logout</button>
+                </div>
+            </div>
         </header>
 
         <div id="error-banner" class="error-banner" style="display: none;"></div>
