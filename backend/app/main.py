@@ -15,7 +15,7 @@ from app.schemas import DiaryEntryCreate, DiaryEntryUpdate, DiaryEntryResponse
 
 # Auth0 Configuration
 AUTH0_DOMAIN = "floki-security.us.auth0.com"
-API_AUDIENCE = "https://dagbok-api"
+AUTH0_API_AUDIENCE = "https://dagbok-api"
 ALGORITHMS = ["RS256"]
 
 # Initialize Database and App
