@@ -43,19 +43,20 @@ test.describe('Frontend E2E Tests - DevSecOps Dagbok', () => {
     });
 
     test('2. Skapa ett nytt inlägg (POST)', async ({ page }) => {
-        await page.route('**/api/entries', async route => {
-            if (route.request().method() === 'POST') {
-                await route.fulfill({ status: 201, body: JSON.stringify({ id: 2 }) });
-            } else {
-                await route.continue();
-            }
-        });
+        // 1. Setup route listener to wait for the POST request
+        const responsePromise = page.waitForResponse(response => 
+            response.url().includes('/api/entries') && response.request().method() === 'POST'
+        );
 
         await page.fill('#title', 'Ny E2E Anteckning');
         await page.fill('#category', 'Automatisering');
         await page.fill('#content', 'Genererat av Playwright');
         await page.click('#submit-btn');
 
+        // 2. Wait for the API response to complete
+        await responsePromise;
+
+        // 3. NOW assert that the form has been cleared
         await expect(page.locator('#title')).toBeEmpty();
     });
 
