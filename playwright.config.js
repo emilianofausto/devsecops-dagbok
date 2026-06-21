@@ -21,7 +21,6 @@ module.exports = defineConfig({
   ],
 
   webServer: {
-    // FIX: Servimos la carpeta exacta del código fuente donde está el index.html
     command: 'npx http-server ./frontend/src -p 5500', 
     url: 'http://127.0.0.1:5500',
     reuseExistingServer: true,
