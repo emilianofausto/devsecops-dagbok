@@ -33,8 +33,6 @@ def mock_verify_token():
     """This is to generate a valid answer from the auth function"""
     return "auth0|test_user"
 
-app.dependency_overrides[verify_token] = mock_verify_token
-
 @pytest.fixture(name="db_session")
 def fixture_db_session():
     """Builds and tears down a clean database schema."""
@@ -53,8 +51,11 @@ def fixture_client(db_session):
         yield db_session
 
     app.dependency_overrides[get_db] = _get_test_db
+    app.dependency_overrides[verify_token] = mock_verify_token
+    
     with TestClient(app) as test_client:
         yield test_client
+        
     app.dependency_overrides.clear()
 
 # ----------------------------------------------------------------------
