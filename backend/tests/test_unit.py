@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 
-from app.main import app, get_db
+from app.main import app, get_db, verify_token
 from app.database import Base
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
@@ -28,6 +28,12 @@ AUTH_HEADERS = {
         "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
     )
 }
+
+def mock_verify_token():
+    """This is to generate a valid answer from the auth function"""
+    return "auth0|test_user"
+
+app.dependency_overrides[verify_token] = mock_verify_token
 
 @pytest.fixture(name="db_session")
 def fixture_db_session():
