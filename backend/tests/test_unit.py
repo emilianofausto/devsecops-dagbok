@@ -52,10 +52,10 @@ def fixture_client(db_session):
 
     app.dependency_overrides[get_db] = _get_test_db
     app.dependency_overrides[verify_token] = mock_verify_token
-    
+
     with TestClient(app) as test_client:
         yield test_client
-        
+
     app.dependency_overrides.clear()
 
 # ----------------------------------------------------------------------
