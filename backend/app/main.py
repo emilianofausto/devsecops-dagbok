@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 import jwt
+from jwt import PyJWKClient
 
 from app.database import Base, engine, get_db, DiaryEntryModel
 from app.schemas import DiaryEntryCreate, DiaryEntryUpdate, DiaryEntryResponse
@@ -17,6 +18,10 @@ from app.schemas import DiaryEntryCreate, DiaryEntryUpdate, DiaryEntryResponse
 AUTH0_DOMAIN = "floki-security.us.auth0.com"
 AUTH0_API_AUDIENCE = "https://devsecops-dagbok.onrender.com"
 ALGORITHMS = ["RS256"]
+
+# Define the URL for Auth0 public keys (JWKS)
+JWKS_URL = "https://floki-security.us.auth0.com/.well-known/jwks.json"
+jwks_client = PyJWKClient(JWKS_URL)
 
 # Initialize Database and App
 Base.metadata.create_all(bind=engine)
@@ -32,31 +37,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Security Validator
-def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)) -> str:
+def verify_token(credentials: HTTPAuthorizationCredentials = Security(HTTPBearer())) -> str:
     """
-    Validates the JWT token provided in the Authorization header
-    and returns the 'sub' (User ID) claim.
+    Validates the Auth0 JWT token by downloading the public key dynamically.
+    Returns the 'sub' (User ID) claim if valid.
     """
+    
+    # Bypass for automated testing environments (e.g., Newman, Pytest)
+    if os.getenv("TEST_MODE") == "True":
+        return "auth0|test_user"
+
     token = credentials.credentials
     try:
+        # Dynamically fetch the appropriate signing key for the token
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+
         payload = jwt.decode(
             token,
-            options={
-                "verify_signature": False,
-                "verify_exp": False,
-                "verify_nbf": False,
-                "verify_iat": False
-            }
+            signing_key.key,
+            algorithms=["RS256"],
+            audience="https://devsecops-dagbok.onrender.com",
+            issuer="https://floki-security.us.auth0.com/"
         )
 
         user_id = payload.get("sub")
         if not user_id:
-            raise ValueError("El token no contiene el claim 'sub'")
+            raise ValueError("Token does not contain the 'sub' claim")
 
         return user_id
 
+    except jwt.ExpiredSignatureError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Token has expired"
+        ) from exc
     except Exception as e:
+        # Catch-all for InvalidTokenError, InvalidKeyError, etc.
         print(f"Auth Error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
