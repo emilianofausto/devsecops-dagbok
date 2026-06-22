@@ -2,55 +2,55 @@
 window.auth0Client = null;
 
 const configureAuth0 = async () => {
-  // Defensive check to avoid ReferenceError if the Auth0 CDN takes time to parse
-  if (typeof auth0 === 'undefined') {
-    console.warn("Auth0 SDK is not available yet. Retrying...");
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return configureAuth0();
-  }
-
-  window.auth0Client = await auth0.createAuth0Client({
-    domain: 'floki-security.us.auth0.com',
-    clientId: 'NQXqkUzGh1Mh1X3NXFE4OCbR9XlYp8TU',
-    authorizationParams: {
-      redirect_uri: window.location.origin,
-      audience: 'https://floki-security.us.auth0.com/api/v2/' 
+    // Defensive check to avoid ReferenceError if the Auth0 CDN takes time to parse
+    if (typeof auth0 === 'undefined') {
+        console.warn("Auth0 SDK is not available yet. Retrying...");
+        await new Promise(resolve => setTimeout(resolve, 100));
+        return configureAuth0();
     }
-  });
 
-  // Handle the redirect callback
-  if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-    await window.auth0Client.handleRedirectCallback();
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
+    window.auth0Client = await auth0.createAuth0Client({
+        domain: 'floki-security.us.auth0.com',
+        clientId: 'NQXqkUzGh1Mh1X3NXFE4OCbR9XlYp8TU',
+        authorizationParams: {
+            redirect_uri: window.location.origin,
+            audience: 'https://devsecops-dagbok.onrender.com'
+        }
+    });
+
+    // Handle the redirect callback
+    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+        await window.auth0Client.handleRedirectCallback();
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 };
 
 // UI Toggling Helper
 const updateAuthUI = async () => {
-  const isAuthenticated = await window.auth0Client.isAuthenticated();
-  document.getElementById('view-unauthenticated').style.display = isAuthenticated ? 'none' : 'block';
-  document.getElementById('view-authenticated').style.display = isAuthenticated ? 'block' : 'none';
+    const isAuthenticated = await window.auth0Client.isAuthenticated();
+    document.getElementById('view-unauthenticated').style.display = isAuthenticated ? 'none' : 'block';
+    document.getElementById('view-authenticated').style.display = isAuthenticated ? 'block' : 'none';
 
-  if (isAuthenticated) {
-    const user = await window.auth0Client.getUser();
-    document.getElementById('user-email').textContent = user.email;
-  }
+    if (isAuthenticated) {
+        const user = await window.auth0Client.getUser();
+        document.getElementById('user-email').textContent = user.email;
+    }
 };
 
 // Call this on app load
 window.addEventListener("load", async () => {
-  await configureAuth0();
-  
-  const isAuthenticated = await window.auth0Client.isAuthenticated();
-  
-  // Force automatic redirection if no active session exists
-  if (!isAuthenticated) {
-    await window.auth0Client.loginWithRedirect();
-    return;
-  }
-  
-  await updateAuthUI();
-  await fetchEntries(); // Start fetching data
+    await configureAuth0();
+
+    const isAuthenticated = await window.auth0Client.isAuthenticated();
+
+    // Force automatic redirection if no active session exists
+    if (!isAuthenticated) {
+        await window.auth0Client.loginWithRedirect();
+        return;
+    }
+
+    await updateAuthUI();
+    await fetchEntries(); // Start fetching data
 });
 
 const API_BASE_URL = '/api/entries';
@@ -91,7 +91,7 @@ async function fetchEntries() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Kunde inte hämta dagboksanteckningar.');
-        
+
         const entries = await response.json();
         renderEntries(entries);
         clearError();
@@ -129,7 +129,7 @@ async function handleFormSubmit(e) {
     try {
         const response = await fetch(url, {
             method: method,
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
@@ -150,7 +150,7 @@ async function deleteEntry(id) {
     if (!window.confirm("Radera?")) return;
 
     try {
-        await fetch(`${API_BASE_URL}/${id}`, { 
+        await fetch(`${API_BASE_URL}/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -158,14 +158,14 @@ async function deleteEntry(id) {
     } catch (error) { displayError(error.message); }
 }
 
-function resetFormState() { 
-    isEditing = false; 
-    diaryForm.reset(); 
+function resetFormState() {
+    isEditing = false;
+    diaryForm.reset();
     formTitle.textContent = 'Skapa ny anteckning'; // Reset the form header back to default text
-    cancelBtn.style.display = 'none'; 
+    cancelBtn.style.display = 'none';
 }
 
-function escapeHTML(str) { return str.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[t])); }
+function escapeHTML(str) { return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\'': '&#39;', '"': '&quot;' }[t])); }
 function escapeQuotes(str) {
     // 1. Escape the backslash first
     // 2. Escape the single quote
@@ -176,7 +176,7 @@ function escapeQuotes(str) {
         .replace(/"/g, '&quot;');
 }
 
-window.populateEditForm = function(id, title, category, content) {
+window.populateEditForm = function (id, title, category, content) {
     isEditing = true;
     formTitle.textContent = 'Redigera anteckning';
     entryIdInput.value = id;
