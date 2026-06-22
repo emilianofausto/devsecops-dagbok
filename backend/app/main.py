@@ -42,7 +42,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(HTTPBearer
     Validates the Auth0 JWT token by downloading the public key dynamically.
     Returns the 'sub' (User ID) claim if valid.
     """
-    
+
     # Bypass for automated testing environments (e.g., Newman, Pytest)
     if os.getenv("TEST_MODE") == "True":
         return "auth0|test_user"
@@ -68,7 +68,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Security(HTTPBearer
 
     except jwt.ExpiredSignatureError as exc:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired"
         ) from exc
     except Exception as e:
